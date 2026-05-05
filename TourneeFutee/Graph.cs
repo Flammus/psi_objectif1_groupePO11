@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TourneeFutee
 {
     public class Graph
     {
+        // Classe interne représentant un sommet
+        
         private class Vertex
         {
             public string Name;
@@ -12,30 +14,34 @@ namespace TourneeFutee
             public Vertex(string name, float value) { Name = name; Value = value; }
         }
 
+        // Attributs privés
         private List<Vertex> _vertices;
         private Matrix _matrix;
         private bool _directed;
         private float _noEdgeValue;
 
-        public Graph(bool directed, float noEdgeValue = 0)
+        // Constructeur
+        public Graph(bool isOriented, float noEdgeValue = 0)
         {
-            _directed = directed;
-            _noEdgeValue = noEdgeValue;
-            _vertices = new List<Vertex>();
-            _matrix = new Matrix(0, 0, noEdgeValue);
+            _directed     = isOriented;
+            _noEdgeValue  = noEdgeValue;
+            _vertices     = new List<Vertex>();
+            _matrix       = new Matrix(0, 0, noEdgeValue);
         }
 
-        public int Order
-        {
-            get { return _vertices.Count; }
-        }
+        // Propriétés publiques
+       
 
-        public bool Directed
-        {
-            get { return _directed; }
-        }
+        public int Order => _vertices.Count;
 
-        // Retourne l'indice du sommet 'name', ou -1 s'il est absent
+        public int VertexCount => _vertices.Count;
+
+        public bool Directed => _directed;
+
+        public bool IsOriented => _directed;
+
+        // Méthodes privées utilitaires
+
         private int IndexOf(string name)
         {
             for (int i = 0; i < _vertices.Count; i++)
@@ -49,7 +55,8 @@ namespace TourneeFutee
                 throw new ArgumentException($"Le sommet '{name}' n'existe pas.");
         }
 
-        // --- Gestion des sommets ---
+       
+        // Gestion des sommets
 
         public void AddVertex(string name, float value = 0)
         {
@@ -73,6 +80,9 @@ namespace TourneeFutee
             _matrix.RemoveColumn(i);
         }
 
+        
+        public bool ContainsVertex(string name) => IndexOf(name) != -1;
+
         public float GetVertexValue(string name)
         {
             int i = IndexOf(name);
@@ -89,9 +99,20 @@ namespace TourneeFutee
             _vertices[i].Value = value;
         }
 
+  
+        public List<string> GetVertexNames()
+        {
+            var names = new List<string>(_vertices.Count);
+            foreach (var v in _vertices)
+                names.Add(v.Name);
+            return names;
+        }
+
+        // Gestion des arcs / arêtes
+
         public List<string> GetNeighbors(string vertexName)
         {
-            List<string> neighborNames = new List<string>();
+            var neighborNames = new List<string>();
             int i = IndexOf(vertexName);
             if (i == -1)
                 throw new ArgumentException($"Le sommet '{vertexName}' n'existe pas.");
@@ -102,8 +123,6 @@ namespace TourneeFutee
 
             return neighborNames;
         }
-
-        // --- Gestion des arcs ---
 
         public void AddEdge(string sourceName, string destinationName, float weight = 1)
         {
@@ -157,6 +176,15 @@ namespace TourneeFutee
             _matrix.SetValue(i, j, weight);
             if (!_directed)
                 _matrix.SetValue(j, i, weight);
+        }
+
+    
+        public bool HasEdge(string sourceName, string destinationName)
+        {
+            int i = IndexOf(sourceName);
+            int j = IndexOf(destinationName);
+            if (i == -1 || j == -1) return false;
+            return _matrix.GetValue(i, j) != _noEdgeValue;
         }
     }
 }
